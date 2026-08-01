@@ -3,7 +3,7 @@ services:
     image: ollama/ollama:latest
     container_name: minigrafana-ollama
     ports:
-      - "11434:11434"
+      - '11434:11434'
     volumes:
       - ollama_data:/root/.ollama
     networks:
@@ -22,6 +22,8 @@ volumes:
   ollama_data:
 
 networks:
+  proxy_network:
+    external: true
   minigrafana-net:
     name: minigrafana-net
     driver: bridge

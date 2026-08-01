@@ -36,6 +36,8 @@ volumes:
   loki_data:
 
 networks:
+  proxy_network:
+    external: true
   minigrafana-net:
     name: minigrafana-net
     driver: bridge

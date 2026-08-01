@@ -240,23 +240,38 @@
 
 ---
 
+## Phase 11 — DevOps & CI/CD (Dockerization & GitHub Actions)
+
+### 11.1 Dockerization Backend
+- [x] **T-114** Buat file `.dockerignore` untuk mengabaikan folder `monitoring/`, `ollama/`, `client/`, `docs/`, `test/`, serta folder yang tidak diperlukan
+- [x] **T-115** Buat `Dockerfile` multi-stage build yang ringan untuk menjalankan production build NestJS backend
+
+### 11.2 CI/CD Pipeline via GitHub Actions
+- [x] **T-116** Buat folder `.github/workflows/`
+- [x] **T-117** Buat workflow `ci.yml` untuk validasi build TypeScript (`bun tsc`), linting, dan testing pada saat Push/PR ke `main`
+- [x] **T-118** Buat workflow `docker-build.yml` untuk menguji build Docker image secara otomatis di CI
+
+---
+
 ## Checklist Summary
 
 | Phase | Total Tasks | Done |
 |---|---|---|
-| Phase 0 — Infrastructure | 12 | 0 |
-| Phase 1 — Backend Global | 4 | 0 |
-| Phase 2 — Loki Module | 11 | 4 ✅ |
-| Phase 3 — Ollama Module | 8 | 0 |
-| Phase 4 — Analysis Module | 17 | 0 |
+| Phase 0 — Infrastructure | 12 | 9 ✅ |
+| Phase 1 — Backend Global | 4 | 4 ✅ |
+| Phase 2 — Loki Module | 11 | 11 ✅ |
+| Phase 3 — Ollama Module | 8 | 8 ✅ |
+| Phase 4 — Analysis Module | 17 | 17 ✅ |
 | Phase 5 — Frontend Setup | 13 | 0 |
 | Phase 6 — Log Explorer | 12 | 0 |
 | Phase 7 — RCA Panel | 7 | 0 |
 | Phase 8 — Dashboard | 6 | 0 |
 | Phase 9 — RCA History | 4 | 0 |
 | Phase 10 — Integration | 13 | 0 |
-| **Total** | **107** | **4** |
+| Phase 11 — DevOps & CI/CD | 5 | 5 ✅ |
+| **Total** | **112** | **54** |
 
 ---
 
-> 💡 **Urutan eksekusi yang disarankan:** Phase 0 → 1 → 2 → 3 → 4 (backend selesai dulu, bisa ditest via Postman/curl) → 5 → 6 → 7 → 8 → 9 → 10
+> 💡 **Urutan eksekusi yang disarankan:** Phase 0 → 1 → 2 → 3 → 4 → 11 (DevOps/CI-CD Backend) → 5 → 6 → 7 → 8 → 9 → 10
+

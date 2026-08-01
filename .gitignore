@@ -1,7 +1,7 @@
 # compiled output
-/dist
-/node_modules
-/build
+dist/
+node_modules/
+build/
 # Logs
 logs
 *.log
@@ -15,8 +15,8 @@ lerna-debug.log*
 .DS_Store
 
 # Tests
-/coverage
-/.nyc_output
+coverage/
+.nyc_output/
 
 # IDEs and editors
 /.idea
@@ -36,10 +36,20 @@ lerna-debug.log*
 
 # dotenv environment variable files
 .env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+monitoring/.env
+monitoring/.env.*
+!monitoring/.env.example
+ollama/.env
+ollama/.env.*
+!ollama/.env.example
 
 # temp directory
 .temp

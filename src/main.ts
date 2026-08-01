@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -8,9 +9,9 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,           // strip properti yang tidak ada di DTO
+      whitelist: true, // strip properti yang tidak ada di DTO
       forbidNonWhitelisted: true, // throw 400 jika ada properti asing
-      transform: true,           // auto-transform query params ke tipe yang benar
+      transform: true, // auto-transform query params ke tipe yang benar
     }),
   );
 
@@ -20,8 +21,28 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
   });
 
+  // Swagger OpenAPI Documentation
+  const config = new DocumentBuilder()
+    .setTitle('Mini-Grafana API')
+    .setDescription(
+      'REST API & Streaming SSE untuk Observability dan Root Cause Analysis berbasis Lokal LLM (Ollama) & Grafana Loki.',
+    )
+    .setVersion('1.0.0')
+    .addTag('Loki', 'Endpoint interaksi log dan label dari Grafana Loki')
+    .addTag('Ollama', 'Endpoint LLM lokal via Ollama')
+    .addTag(
+      'Analysis',
+      'Endpoint analisis Root Cause log error & riwayat database',
+    )
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
   console.log(`Application running on http://localhost:${port}`);
+  console.log(
+    `Swagger Docs available at http://localhost:${port}/api/docs`,
+  );
 }
 bootstrap();

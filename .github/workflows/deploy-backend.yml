@@ -6,7 +6,7 @@ on:
     paths:
       - "backend/**"
       - ".github/workflows/deploy-backend.yml"
-      - '!**/**/*.md'
+      - "!**/**/*.md"
   workflow_dispatch:
 
 # ✅ 1. WAJIB DEFINISIKAN ENV DI ROOT AGAR TIDAK NYASAR KE DOCKER HUB!
@@ -49,11 +49,11 @@ jobs:
   # ==========================================================
   build-and-push-ghcr:
     name: 2. Build & Push Docker Image to GHCR
-    needs: build-and-test                       # ✅ KUNCI: Harus nunggu Job 1 sukses!
+    needs: build-and-test # ✅ KUNCI: Harus nunggu Job 1 sukses!
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write                           # ✅ KUNCI: Izin push ke GHCR
+      packages: write # ✅ KUNCI: Izin push ke GHCR
 
     steps:
       - name: Checkout repository
@@ -96,7 +96,7 @@ jobs:
   # ==========================================================
   deploy-to-production:
     name: 3. Deploy to Server & Run Migrations
-    needs: build-and-push-ghcr                  # ✅ KUNCI: Harus nunggu Job 2 sukses!
+    needs: build-and-push-ghcr # ✅ KUNCI: Harus nunggu Job 2 sukses!
     runs-on: ubuntu-latest
     environment: staging
 
@@ -113,7 +113,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "backend/docker-compose.yml"
           target: "${{ secrets.DEPLOY_PATH_BACKEND }}"
-          strip_components: 1                   # ✅ KUNCI: Letakkan langsung docker-compose.yml di target!
+          strip_components: 1 # ✅ KUNCI: Letakkan langsung docker-compose.yml di target!
 
       - name: Deploy & Execute DB Migrations via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -123,7 +123,7 @@ jobs:
           port: ${{ secrets.SERVER_PORT || '22' }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 30m
-          script_stop: true                     # ✅ KUNCI: Hentikan langsung jika ada error 1 pun!
+          script_stop: true # ✅ KUNCI: Hentikan langsung jika ada error 1 pun!
           script: |
             echo "=========================================================="
             echo " [1/5] Masuk ke direktori aplikasi"
@@ -137,9 +137,7 @@ jobs:
             echo " [2/5] Menulis file .env production"
             echo "=========================================================="
             # Menulis file .env di level direktori yang sama dengan docker-compose.yml
-            cat <<'EOF_ENV' > .env
-            ${{ secrets.ENV_PROD_BACKEND }}
-            EOF_ENV
+            echo "${{ secrets.ENV_PROD_BACKEND }}" | base64 -d > .env
             chmod 600 .env
 
             echo "=========================================================="

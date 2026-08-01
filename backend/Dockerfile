@@ -1,5 +1,5 @@
 # ==========================================
-# Stage 1: Build & Compile NestJS Backend
+# Stage 1: Build & Compile TypeScript Backend
 # ==========================================
 FROM oven/bun:alpine AS build
 WORKDIR /app
@@ -10,7 +10,7 @@ COPY package.json bun.lock ./
 # Install seluruh dependencies (termasuk devDependencies untuk build ts)
 RUN bun install --frozen-lockfile
 
-# Copy source code backend
+# Copy seluruh source code backend
 COPY . .
 
 # Compile TypeScript ke direktori /dist
@@ -32,8 +32,14 @@ COPY package.json bun.lock ./
 # Install HANYA production dependencies (menghemat ukuran image)
 RUN bun install --production --frozen-lockfile
 
-# Copy artifact build dari stage pertama
+# Copy artifact build utama dari stage build
 COPY --from=build /app/dist ./dist
+
+# ✅ KUNCI MUTLAK: Copy folder SQL migrasi Drizzle agar terbaca saat runtime!
+COPY --from=build /app/drizzle ./drizzle
+
+# ✅ KUNCI MUTLAK: Copy script/file migrasi TypeScript (jika lu jalankan via bun run src/lib/db/migrate.ts)
+COPY --from=build /app/src/lib/db ./src/lib/db
 
 # Expose port aplikasi NestJS
 EXPOSE 3000

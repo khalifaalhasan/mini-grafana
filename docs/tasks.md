@@ -53,26 +53,26 @@
 
 ### 2.1 DTO
 
-- [ ] **T-023** ✅ Buat `dto/loki-query.dto.ts` dengan interface `LokiQueryParams` *(selesai)*
-- [ ] **T-024** ✅ Buat `dto/loki-response.dto.ts` dengan interface `LokiStream`, `LokiQueryRangeResponse`, dsb. *(selesai)*
-- [ ] **T-025** Buat `dto/loki-labels.dto.ts` dengan interface `LokiLabelsResponse` dan `LokiLabelValuesResponse`
+- [x] **T-023** ✅ Buat `dto/loki-query.dto.ts` dengan interface `LokiQueryParams` *(selesai)*
+- [x] **T-024** ✅ Buat `dto/loki-response.dto.ts` dengan interface `LokiStream`, `LokiQueryRangeResponse`, dsb. *(selesai)*
+- [x] **T-025** Buat `dto/loki-labels.dto.ts` dengan interface `LokiLabelsResponse` dan `LokiLabelValuesResponse`
 
 ### 2.2 Service
 
-- [ ] **T-026** ✅ Implementasi `queryRange()` di `loki.service.ts` menggunakan `HttpService` *(selesai)*
-- [ ] **T-027** Tambahkan method `getLabels(): Promise<string[]>` — hit `GET /loki/api/v1/labels`
-- [ ] **T-028** Tambahkan method `getLabelValues(labelName: string): Promise<string[]>` — hit `GET /loki/api/v1/label/{name}/values`
+- [x] **T-026** ✅ Implementasi `queryRange()` di `loki.service.ts` menggunakan `HttpService` *(selesai)*
+- [x] **T-027** Tambahkan method `getLabels(): Promise<string[]>` — hit `GET /loki/api/v1/labels`
+- [x] **T-028** Tambahkan method `getLabelValues(labelName: string): Promise<string[]>` — hit `GET /loki/api/v1/label/{name}/values`
 
 ### 2.3 Controller
 
-- [ ] **T-029** Tambahkan endpoint `GET /loki/logs` di `LokiController` — menerima query params dan memanggil `queryRange()`
-- [ ] **T-030** Tambahkan `@Query()` DTO validation untuk endpoint `/loki/logs` (gunakan `class-validator`)
-- [ ] **T-031** Tambahkan endpoint `GET /loki/labels` di `LokiController` — memanggil `getLabels()`
-- [ ] **T-032** Tambahkan endpoint `GET /loki/label/:name/values` di `LokiController` — memanggil `getLabelValues()`
+- [x] **T-029** Tambahkan endpoint `GET /loki/logs` di `LokiController` — menerima query params dan memanggil `queryRange()`
+- [x] **T-030** Tambahkan `@Query()` DTO validation untuk endpoint `/loki/logs` (gunakan `class-validator`)
+- [x] **T-031** Tambahkan endpoint `GET /loki/labels` di `LokiController` — memanggil `getLabels()`
+- [x] **T-032** Tambahkan endpoint `GET /loki/label/:name/values` di `LokiController` — memanggil `getLabelValues()`
 
 ### 2.4 Module
 
-- [ ] **T-033** ✅ Tambahkan `HttpModule` dan `LoggerModule` ke `LokiModule` imports *(selesai)*
+- [x] **T-033** ✅ Tambahkan `HttpModule` dan `LoggerModule` ke `LokiModule` imports *(selesai)*
 
 ---
 

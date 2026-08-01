@@ -9,6 +9,8 @@
 | **Reviewer** | — |
 | **Last Updated** | 2026-08-01 |
 | **Target Launch** | — |
+| **Frontend URL** | [https://monitoring.linkgoto.app](https://monitoring.linkgoto.app) |
+| **Backend API URL** | [https://monitoring.linkgoto.app/api](https://monitoring.linkgoto.app/api) |
 
 ---
 
@@ -112,7 +114,11 @@ Dengan menyediakan dasbor log yang terpusat dan analisis root cause otomatis men
 
 ## 6. Technical Architecture
 
-### 6.1 Arsitektur Sistem
+### 6.1 Production Deployment URLs
+- **Frontend Dashboard (UI)**: `https://monitoring.linkgoto.app`
+- **Backend API Endpoint**: `https://monitoring.linkgoto.app/api`
+
+### 6.2 Arsitektur Sistem
 
 ```
 ┌─────────────────────────────────────────────────────────┐

@@ -8,18 +8,18 @@
 
 ### 0.1 Docker & Services
 
-- [ ] **T-001** Buat `docker-compose.yml` di root project dengan service: `loki`, `grafana`, `postgresql`
-- [ ] **T-002** Tambahkan Loki config file (`loki-config.yml`) sebagai volume mount di docker-compose
-- [ ] **T-003** Jalankan `docker-compose up -d` dan verifikasi Loki berjalan di `http://localhost:3100/ready`
-- [ ] **T-004** Verifikasi PostgreSQL berjalan dan bisa diakses di port `5432`
+- [x] **T-001** Buat `docker-compose.yml` di root project dengan service: `loki`, `grafana`, `postgresql`
+- [x] **T-002** Tambahkan Loki config file (`loki-config.yml`) sebagai volume mount di docker-compose
+- [x] **T-003** Jalankan `docker-compose up -d` dan verifikasi Loki berjalan di `http://localhost:3100/ready`
+- [x] **T-004** Verifikasi PostgreSQL berjalan dan bisa diakses di port `5432`
 
 ### 0.2 Environment Variables
 
-- [ ] **T-005** Tambahkan `LOKI_URL=http://localhost:3100` ke file `.env`
-- [ ] **T-006** Tambahkan `OLLAMA_URL=http://localhost:11434` ke file `.env`
-- [ ] **T-007** Tambahkan `OLLAMA_DEFAULT_MODEL=llama3` ke file `.env`
-- [ ] **T-008** Tambahkan `DATABASE_URL=postgresql://...` ke file `.env`
-- [ ] **T-009** Buat file `.env.example` sebagai template (tanpa nilai sensitif)
+- [x] **T-005** Tambahkan `LOKI_URL=http://localhost:3100` ke file `.env`
+- [x] **T-006** Tambahkan `OLLAMA_URL=http://localhost:11434` ke file `.env`
+- [x] **T-007** Tambahkan `OLLAMA_DEFAULT_MODEL=llama3` ke file `.env`
+- [x] **T-008** Tambahkan `DATABASE_URL=postgresql://...` ke file `.env`
+- [x] **T-009** Buat file `.env.example` sebagai template (tanpa nilai sensitif)
 
 ### 0.3 Ollama Setup
 

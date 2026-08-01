@@ -1,0 +1,30 @@
+// ==========================================
+// Grafana Alloy Configuration (Log Collector)
+// ==========================================
+// Mengumpulkan dan memformat log untuk dikirim ke Loki (minigrafana-loki:3100)
+
+loki.write "local_loki" {
+  endpoint {
+    url = "http://minigrafana-loki:3100/loki/api/v1/push"
+  }
+}
+
+// 1. HTTP Push Receiver (opsional) - Menerima log via HTTP push di port 3101
+loki.source.api "http_receiver" {
+  http {
+    listen_address = "0.0.0.0"
+    listen_port = 3101
+  }
+  forward_to = [loki.write.local_loki.receiver]
+}
+
+// 2. Contoh: Scrape log Docker kontainer di server (bisa diaktifkan dengan mount /var/run/docker.sock)
+// discovery.docker "containers" {
+//   host = "unix:///var/run/docker.sock"
+// }
+// 
+// loki.source.docker "default" {
+//   host       = "unix:///var/run/docker.sock"
+//   targets    = discovery.docker.containers.targets
+//   forward_to = [loki.write.local_loki.receiver]
+// }

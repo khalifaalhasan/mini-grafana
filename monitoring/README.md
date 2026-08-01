@@ -1,6 +1,9 @@
-# Monitoring Docker Compose (Terpisah)
+# Monitoring Docker Compose (Loki + Grafana Alloy)
 
-Konfigurasi Docker Compose terpisah untuk menjalankan stack observabilitas (**Grafana & Loki**) agar bisa dengan mudah dijalankan di server terpisah maupun tidak membebani mesin lokal.
+Konfigurasi Docker Compose terpisah untuk menjalankan stack observabilitas backend (**Grafana Loki** sebagai storage log dan **Grafana Alloy** sebagai agen/kolektor log) agar bisa di-deploy dengan mudah di server terpisah maupun tidak membebani laptop lokal.
+
+> **Kenapa tidak ada Grafana UI?**  
+> Karena antarmuka dasbor visual akan ditangani oleh aplikasi **Mini-Grafana** kita (React + Vite) yang langsung mengambil data dari Loki dan melakukan Root Cause Analysis dengan LLM.
 
 ## Cara Menjalankan Monitoring Stack:
 ```bash
@@ -9,8 +12,10 @@ docker compose up -d
 ```
 
 ## Akses Service:
-- **Grafana**: `http://localhost:3001` (User: `admin`, Password: `admin`)
-- **Loki**: `http://localhost:3100`
+- **Loki API**: `http://localhost:3100` (`http://minigrafana-loki:3100` di dalam jaringan Docker)
+- **Grafana Alloy UI**: `http://localhost:12345` (Web UI untuk melihat status collector Alloy)
+- **Alloy HTTP Push Receiver**: `http://localhost:3101`
 
-> **Catatan Jaringan (Shared Network)**:  
-> Komponen ini terhubung ke dalam jaringan Docker bersama ber-name `minigrafana-net`. Sehingga di production, container lain (seperti NestJS backend) bisa memanggil langsung melalui host `http://minigrafana-loki:3100`.
+## File Konfigurasi:
+- `loki-config.yml` — Konfigurasi server penyimpanan log Loki.
+- `config.alloy` — Konfigurasi agen Grafana Alloy untuk mengumpulkan dan mengirim log ke Loki.

@@ -12,17 +12,20 @@ services:
       - minigrafana-net
     restart: unless-stopped
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: minigrafana-grafana
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
+  alloy:
+    image: grafana/alloy:latest
+    container_name: minigrafana-alloy
     ports:
-      - "3001:3000"
+      - "12345:12345" # Alloy UI & API
+      - "3101:3101"   # Alloy HTTP log receiver
     volumes:
-      - grafana_data:/var/lib/grafana
+      - ./config.alloy:/etc/alloy/config.alloy:ro,z
+      # Uncomment jika ingin mengoleksi log dari kontainer Docker di server:
+      # - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - /etc/alloy/config.alloy
     networks:
       - minigrafana-net
     depends_on:
@@ -31,7 +34,6 @@ services:
 
 volumes:
   loki_data:
-  grafana_data:
 
 networks:
   minigrafana-net:

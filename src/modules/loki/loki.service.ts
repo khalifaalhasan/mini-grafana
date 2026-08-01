@@ -5,6 +5,7 @@ import { AxiosError } from 'axios';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { LokiQueryParams } from './dto/loki-query.dto';
 import { LokiQueryRangeResponse } from './dto/loki-response.dto';
+import { LokiLabelsResponse, LokiLabelValuesResponse } from './dto/loki-labels.dto';
 
 @Injectable()
 export class LokiService {
@@ -59,6 +60,68 @@ export class LokiService {
       );
 
       return data;
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        const status = err.response?.status ?? 'N/A';
+        const body = err.response?.data ?? err.message;
+        this.logger.error(`Loki HTTP error ${status}: ${JSON.stringify(body)}`);
+        throw new Error(`Loki HTTP ${status}: ${JSON.stringify(body)}`);
+      }
+      throw err;
+    }
+  }
+
+  /**
+   * Mengambil semua label keys yang tersedia di Loki.
+   * Hits `GET /loki/api/v1/labels`.
+   */
+  async getLabels(): Promise<string[]> {
+    const endpoint = `${this.lokiBaseUrl}/loki/api/v1/labels`;
+
+    this.logger.debug(`GET ${endpoint}`);
+
+    try {
+      const { data } = await firstValueFrom(
+        this.httpService.get<LokiLabelsResponse>(endpoint, {
+          headers: { Accept: 'application/json' },
+        }),
+      );
+
+      this.logger.debug(`Loki returned ${data.data.length} label(s)`);
+      return data.data;
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        const status = err.response?.status ?? 'N/A';
+        const body = err.response?.data ?? err.message;
+        this.logger.error(`Loki HTTP error ${status}: ${JSON.stringify(body)}`);
+        throw new Error(`Loki HTTP ${status}: ${JSON.stringify(body)}`);
+      }
+      throw err;
+    }
+  }
+
+  /**
+   * Mengambil semua values untuk satu label key tertentu.
+   * Hits `GET /loki/api/v1/label/{name}/values`.
+   *
+   * @param labelName - Nama label key, contoh: 'app', 'env', 'level'
+   */
+  async getLabelValues(labelName: string): Promise<string[]> {
+    const endpoint = `${this.lokiBaseUrl}/loki/api/v1/label/${encodeURIComponent(labelName)}/values`;
+
+    this.logger.debug(`GET ${endpoint}`);
+
+    try {
+      const { data } = await firstValueFrom(
+        this.httpService.get<LokiLabelValuesResponse>(endpoint, {
+          headers: { Accept: 'application/json' },
+        }),
+      );
+
+      this.logger.debug(
+        `Loki returned ${data.data.length} value(s) for label "${labelName}"`,
+      );
+      return data.data;
     } catch (err) {
       if (err instanceof AxiosError) {
         const status = err.response?.status ?? 'N/A';

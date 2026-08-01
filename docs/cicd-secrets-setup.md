@@ -4,7 +4,10 @@ Dokumen ini menjelaskan daftar variabel rahasia (*Repository Secrets* & *Reposit
 
 ---
 
-## 1. Daftar GitHub Repository Secrets (`Settings` > `Secrets and variables` > `Actions` > `Secrets`)
+## 1. Daftar GitHub Secrets (`Settings` > `Secrets and variables` > `Actions`)
+
+> [!NOTE]
+> Semua workflow deployment menggunakan GitHub Environment bernama **`server_pustipd`**. Pastikan kamu menambahkan rahasia di bawah ini ke dalam **Environment secrets** untuk lingkungan **`server_pustipd`** (atau di *Repository secrets* agar berlaku global).
 
 ### 1.1 Kredensial Server & SSH
 | Nama Secret | Deskripsi | Contoh Nilai |

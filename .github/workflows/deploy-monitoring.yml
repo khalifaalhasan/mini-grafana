@@ -13,7 +13,7 @@ jobs:
   deploy-monitoring:
     name: Deploy Monitoring Stack via SSH
     runs-on: ubuntu-latest
-    environment: server_pustipd
+    environment: staging
 
     steps:
       - name: Checkout repository

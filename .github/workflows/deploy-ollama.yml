@@ -13,7 +13,7 @@ jobs:
   deploy-ollama:
     name: Deploy Ollama Stack via SSH
     runs-on: ubuntu-latest
-    environment: server_pustipd
+    environment: staging
 
     steps:
       - name: Checkout repository

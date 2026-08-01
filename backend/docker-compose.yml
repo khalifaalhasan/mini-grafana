@@ -48,6 +48,7 @@ networks:
   minigrafana-net:
     name: minigrafana-net
     driver: bridge
+    external: true
   proxy_network:
     name: proxy_network
     external: true

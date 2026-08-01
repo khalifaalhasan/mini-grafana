@@ -3,11 +3,15 @@ services:
     image: ollama/ollama:latest
     container_name: minigrafana-ollama
     ports:
-      - '11434:11434'
+      - "${OLLAMA_PORT:-11434}:11434"
+    environment:
+      OLLAMA_ORIGINS: "${OLLAMA_ORIGINS:-*}"
+      OLLAMA_KEEP_ALIVE: "${OLLAMA_KEEP_ALIVE:-24h}"
     volumes:
       - ollama_data:/root/.ollama
     networks:
       - minigrafana-net
+      - proxy_network
     # Uncomment blok di bawah jika ingin menggunakan percepatan GPU NVIDIA (memerlukan nvidia-container-toolkit):
     # deploy:
     #   resources:
@@ -22,8 +26,9 @@ volumes:
   ollama_data:
 
 networks:
-  proxy_network:
-    external: true
   minigrafana-net:
     name: minigrafana-net
     driver: bridge
+  proxy_network:
+    name: proxy_network
+    external: true

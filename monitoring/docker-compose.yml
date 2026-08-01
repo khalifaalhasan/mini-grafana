@@ -3,21 +3,22 @@ services:
     image: grafana/loki:latest
     container_name: minigrafana-loki
     ports:
-      - "3100:3100"
+      - "${LOKI_PORT:-3100}:3100"
     volumes:
       - ./loki-config.yml:/etc/loki/local-config.yaml:ro,z
       - loki_data:/loki
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - minigrafana-net
+      - proxy_network
     restart: unless-stopped
 
   alloy:
     image: grafana/alloy:latest
     container_name: minigrafana-alloy
     ports:
-      - "12345:12345" # Alloy UI & API
-      - "3101:3101"   # Alloy HTTP log receiver
+      - "${ALLOY_UI_PORT:-12345}:12345" # Alloy UI & API
+      - "${ALLOY_HTTP_PORT:-3101}:3101" # Alloy HTTP log receiver
     volumes:
       - ./config.alloy:/etc/alloy/config.alloy:ro,z
       # Uncomment jika ingin mengoleksi log dari kontainer Docker di server:
@@ -28,6 +29,7 @@ services:
       - /etc/alloy/config.alloy
     networks:
       - minigrafana-net
+      - proxy_network
     depends_on:
       - loki
     restart: unless-stopped
@@ -36,8 +38,9 @@ volumes:
   loki_data:
 
 networks:
-  proxy_network:
-    external: true
   minigrafana-net:
     name: minigrafana-net
     driver: bridge
+  proxy_network:
+    name: proxy_network
+    external: true

@@ -80,23 +80,23 @@
 
 ### 3.1 DTO
 
-- [ ] **T-034** Buat `dto/ollama-generate.dto.ts` dengan interface untuk request body ke Ollama (`model`, `prompt`, `stream`, dsb.)
-- [ ] **T-035** Buat `dto/ollama-response.dto.ts` dengan interface untuk response Ollama (streaming & non-streaming)
+- [x] **T-034** Buat `dto/ollama-generate.dto.ts` dengan interface untuk request body ke Ollama (`model`, `prompt`, `stream`, dsb.)
+- [x] **T-035** Buat `dto/ollama-response.dto.ts` dengan interface untuk response Ollama (streaming & non-streaming)
 
 ### 3.2 Service
 
-- [ ] **T-036** Setup `OllamaService` dengan inject `HttpService` dan `PinoLogger`
-- [ ] **T-037** Tambahkan method `generate(model: string, prompt: string): Promise<string>` — hit `POST /api/generate` Ollama (non-streaming)
-- [ ] **T-038** Tambahkan method `generateStream(model: string, prompt: string): Observable<string>` — hit `POST /api/generate` dengan `stream: true`
-- [ ] **T-039** Tambahkan method `listModels(): Promise<string[]>` — hit `GET /api/tags` Ollama
+- [x] **T-036** Setup `OllamaService` dengan inject `HttpService` dan `PinoLogger`
+- [x] **T-037** Tambahkan method `generate(model: string, prompt: string): Promise<string>` — hit `POST /api/generate` Ollama (non-streaming)
+- [x] **T-038** Tambahkan method `generateStream(model: string, prompt: string): Observable<string>` — hit `POST /api/generate` dengan `stream: true`
+- [x] **T-039** Tambahkan method `listModels(): Promise<string[]>` — hit `GET /api/tags` Ollama
 
 ### 3.3 Controller
 
-- [ ] **T-040** Tambahkan endpoint `GET /ollama/models` — memanggil `listModels()`
+- [x] **T-040** Tambahkan endpoint `GET /ollama/models` — memanggil `listModels()`
 
 ### 3.4 Module
 
-- [ ] **T-041** Tambahkan `HttpModule` dan `LoggerModule` ke `OllamaModule` imports
+- [x] **T-041** Tambahkan `HttpModule` dan `LoggerModule` ke `OllamaModule` imports
 
 ---
 
@@ -104,35 +104,35 @@
 
 ### 4.1 Buat Module Skeleton
 
-- [ ] **T-042** Generate `AnalysisModule` dengan `nest g module modules/analysis`
-- [ ] **T-043** Generate `AnalysisService` dengan `nest g service modules/analysis`
-- [ ] **T-044** Generate `AnalysisController` dengan `nest g controller modules/analysis`
-- [ ] **T-045** Daftarkan `AnalysisModule` di `AppModule`
+- [x] **T-042** Generate `AnalysisModule` dengan `nest g module modules/analysis`
+- [x] **T-043** Generate `AnalysisService` dengan `nest g service modules/analysis`
+- [x] **T-044** Generate `AnalysisController` dengan `nest g controller modules/analysis`
+- [x] **T-045** Daftarkan `AnalysisModule` di `AppModule`
 
 ### 4.2 DTO
 
-- [ ] **T-046** Buat `dto/rca-request.dto.ts` dengan field: `logMessage`, `logLabels`, `logTimestamp`, `model` (optional)
-- [ ] **T-047** Buat `dto/rca-response.dto.ts` dengan field: `rootCause`, `impact`, `recommendation`, `rawResponse`, `modelUsed`
+- [x] **T-046** Buat `dto/rca-request.dto.ts` dengan field: `logMessage`, `logLabels`, `logTimestamp`, `model` (optional)
+- [x] **T-047** Buat `dto/rca-response.dto.ts` dengan field: `rootCause`, `impact`, `recommendation`, `rawResponse`, `modelUsed`
 
 ### 4.3 Prompt Engineering
 
-- [ ] **T-048** Buat file `analysis.prompt.ts` (atau `constants/`) berisi template prompt untuk RCA
-- [ ] **T-049** Prompt harus menghasilkan output terstruktur JSON dengan key: `root_cause`, `impact`, `recommendation`
+- [x] **T-048** Buat file `analysis.prompt.ts` (atau `constants/`) berisi template prompt untuk RCA
+- [x] **T-049** Prompt harus menghasilkan output terstruktur JSON dengan key: `root_cause`, `impact`, `recommendation`
 
 ### 4.4 Service
 
-- [ ] **T-050** Inject `OllamaService` dan `DrizzleModule`/db ke `AnalysisService`
-- [ ] **T-051** Implementasi method `analyzeLog(dto: RcaRequestDto): Promise<RcaResponseDto>` — build prompt → kirim ke Ollama → parse JSON response
-- [ ] **T-052** Implementasi method `analyzeLogStream(dto: RcaRequestDto): Observable<string>` — streaming via `generateStream()`
-- [ ] **T-053** Implementasi method `saveResult(result: RcaResponseDto): Promise<void>` — simpan ke tabel `rca_results` via Drizzle
-- [ ] **T-054** Implementasi method `getHistory(limit?: number): Promise<RcaResponseDto[]>` — ambil dari tabel `rca_results`
+- [x] **T-050** Inject `OllamaService` dan `DrizzleModule`/db ke `AnalysisService`
+- [x] **T-051** Implementasi method `analyzeLog(dto: RcaRequestDto): Promise<RcaResponseDto>` — build prompt → kirim ke Ollama → parse JSON response
+- [x] **T-052** Implementasi method `analyzeLogStream(dto: RcaRequestDto): Observable<string>` — streaming via `generateStream()`
+- [x] **T-053** Implementasi method `saveResult(result: RcaResponseDto): Promise<void>` — simpan ke tabel `rca_results` via Drizzle
+- [x] **T-054** Implementasi method `getHistory(limit?: number): Promise<RcaResponseDto[]>` — ambil dari tabel `rca_results`
 
 ### 4.5 Controller
 
-- [ ] **T-055** Tambahkan endpoint `POST /analysis/rca` — memanggil `analyzeLog()` dan `saveResult()`
-- [ ] **T-056** Tambahkan endpoint `POST /analysis/rca/stream` — memanggil `analyzeLogStream()` sebagai SSE (`@Sse()`)
-- [ ] **T-057** Tambahkan endpoint `GET /analysis/history` — memanggil `getHistory()`
-- [ ] **T-058** Tambahkan `@Body()` validation via `class-validator` pada endpoint POST
+- [x] **T-055** Tambahkan endpoint `POST /analysis/rca` — memanggil `analyzeLog()` dan `saveResult()`
+- [x] **T-056** Tambahkan endpoint `POST /analysis/rca/stream` — memanggil `analyzeLogStream()` sebagai SSE (`@Sse()`)
+- [x] **T-057** Tambahkan endpoint `GET /analysis/history` — memanggil `getHistory()`
+- [x] **T-058** Tambahkan `@Body()` validation via `class-validator` pada endpoint POST
 
 ---
 

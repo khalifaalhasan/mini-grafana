@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { DrizzleModule } from './lib/db/drizzle.module';
 import { LokiModule } from './modules/loki/loki.module';
 import { OllamaModule } from './modules/ollama/ollama.module';
+import { AnalysisModule } from './modules/analysis/analysis.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { OllamaModule } from './modules/ollama/ollama.module';
     DrizzleModule,
     LokiModule,
     OllamaModule,
+    AnalysisModule,
   ],
   controllers: [AppController],
   providers: [AppService],

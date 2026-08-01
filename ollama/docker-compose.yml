@@ -1,0 +1,27 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: minigrafana-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - minigrafana-net
+    # Uncomment blok di bawah jika ingin menggunakan percepatan GPU NVIDIA (memerlukan nvidia-container-toolkit):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+
+networks:
+  minigrafana-net:
+    name: minigrafana-net
+    driver: bridge

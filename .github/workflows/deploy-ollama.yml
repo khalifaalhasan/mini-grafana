@@ -6,7 +6,7 @@ on:
     paths:
       - "ollama/**"
       - '.github/workflows/deploy-ollama'
-
+      - '!**/**/*.md'
 
   workflow_dispatch: # Trigger manual dari GitHub Actions UI
 

@@ -6,6 +6,7 @@ on:
     paths:
       - "monitoring/**"
       - '.github/workflows/deploy-monitoring.yml'
+      - '!**/**/*.md'
 
   workflow_dispatch: # Trigger manual dari GitHub Actions UI
 

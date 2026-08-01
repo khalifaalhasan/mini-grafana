@@ -1,0 +1,158 @@
+name: CD — Deploy Frontend Dashboard
+
+on:
+  push:
+    branches: [ "main", "production" ]
+    paths:
+      - "frontend/**"
+      - '.github/workflows/deploy-frontend'
+      - '!**/**/*.md'
+
+
+  workflow_dispatch: # Trigger manual dari GitHub Actions UI
+
+jobs:
+  build-and-test-frontend:
+    name: Build & Lint Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun environment
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies (jika package.json ada)
+        run: |
+          if [ -f "package.json" ]; then
+            bun install --frozen-lockfile
+          else
+            echo "package.json belum ada di folder frontend/. Melewatkan instalasi."
+          fi
+
+      - name: Lint & Build (jika package.json ada)
+        run: |
+          if [ -f "package.json" ]; then
+            bun run build --if-present
+          else
+            echo "package.json belum ada di folder frontend/. Melewatkan build."
+          fi
+  build-and-push-ghcr-frontend:
+    name: Build & Push Frontend Docker Image to GHCR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Periksa keberadaan Dockerfile Frontend
+        id: check_files
+        run: |
+          if [ -f "frontend/Dockerfile" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Dockerfile belum tersedia di frontend/. Melewatkan build Docker."
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.check_files.outputs.exists == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        if: steps.check_files.outputs.exists == 'true' && github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata (tags, labels)
+        if: steps.check_files.outputs.exists == 'true'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Frontend Docker image to GHCR
+        if: steps.check_files.outputs.exists == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+        
+  deploy-frontend:
+    name: Deploy Frontend Stack via SSH
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy Frontend Docker Compose file via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "frontend/docker-compose.yml"
+          target: "${{ vars.DEPLOY_PATH_FRONTEND || secrets.DEPLOY_PATH_FRONTEND || format('/home/{0}/mini-grafana-frontend', secrets.SERVER_USER) }}"
+
+      - name: Deploy Frontend Stack to Server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            echo "=========================================================="
+            echo " [1/3] Menentukan direktori dan Git Pull (Frontend)"
+            echo "=========================================================="
+            DEPLOY_DIR="${{ vars.DEPLOY_PATH_FRONTEND || secrets.DEPLOY_PATH_FRONTEND || format('/home/{0}/mini-grafana-frontend', secrets.SERVER_USER) }}"
+            echo "Directori frontend deployment: $DEPLOY_DIR"
+            mkdir -p "$DEPLOY_DIR"
+            cd "$DEPLOY_DIR" || exit 1
+
+            # Jika ini repositori git atau folder tersendiri:
+            if [ -d ".git" ]; then
+              git fetch --all
+              git reset --hard origin/main
+            fi
+
+            echo "=========================================================="
+            echo " [2/3] Menulis file .env dari secret ENV_FRONTEND"
+            echo "=========================================================="
+            cat <<'EOF_ENV' > .env
+            ${{ secrets.ENV_FRONTEND }}
+            EOF_ENV
+            chmod 600 .env
+
+            echo "=========================================================="
+            echo " [3/3] Menjalankan / Merestart Container Frontend"
+            echo "=========================================================="
+            docker network inspect proxy_network >/dev/null 2>&1 || docker network create proxy_network
+            cd frontend && docker compose up -d --force-recreate
+            echo "✅ Deployment Frontend Dashboard selesai!"

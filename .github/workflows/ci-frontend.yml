@@ -9,6 +9,8 @@ on:
     branches: [ "main", "master" ]
     paths:
       - "frontend/**"
+      - ".github/**"
+
 
 jobs:
   build-and-test-frontend:

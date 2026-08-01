@@ -5,6 +5,7 @@ on:
     branches: [ "main", "production" ]
     paths:
       - "frontend/**"
+      - ".github/**"
   workflow_dispatch: # Trigger manual dari GitHub Actions UI
 
 jobs:

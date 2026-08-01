@@ -5,6 +5,8 @@ on:
     branches: ['main', 'production']
     paths:
       - 'backend/**'
+      - ".github/**"
+
   workflow_dispatch: # Memungkinkan trigger deployment secara manual dari GitHub Actions UI
 
 jobs:

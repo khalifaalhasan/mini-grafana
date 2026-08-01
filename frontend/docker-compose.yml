@@ -1,0 +1,23 @@
+services:
+  frontend:
+    image: ghcr.io/${GHCR_IMAGE:-khalifaalhasan/mini-grafana-frontend}:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: minigrafana-frontend
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    env_file:
+      - .env
+    networks:
+      - minigrafana-net
+      - proxy_network
+    restart: unless-stopped
+
+networks:
+  minigrafana-net:
+    name: minigrafana-net
+    driver: bridge
+  proxy_network:
+    name: proxy_network
+    external: true

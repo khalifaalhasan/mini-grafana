@@ -1,9 +1,25 @@
 import { Module } from '@nestjs/common';
+import { LoggerModule } from 'nestjs-pino';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { DrizzleModule } from './lib/db/drizzle.module';
+import { LokiModule } from './modules/loki/loki.module';
+import { OllamaModule } from './modules/ollama/ollama.module';
 
 @Module({
-  imports: [],
+  imports: [
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? { target: 'pino-pretty', options: { singleLine: true } }
+            : undefined,
+      },
+    }),
+    DrizzleModule,
+    LokiModule,
+    OllamaModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

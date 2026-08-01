@@ -1,0 +1,72 @@
+name: Docker CI/CD — Publish Frontend to GHCR
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    paths:
+      - "frontend/**"
+  pull_request:
+    branches: [ "main", "master" ]
+    paths:
+      - "frontend/**"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}-frontend
+
+jobs:
+  build-and-push-ghcr-frontend:
+    name: Build & Push Frontend Docker Image to GHCR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Periksa keberadaan Dockerfile Frontend
+        id: check_files
+        run: |
+          if [ -f "frontend/Dockerfile" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Dockerfile belum tersedia di frontend/. Melewatkan build Docker."
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.check_files.outputs.exists == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        if: steps.check_files.outputs.exists == 'true' && github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata (tags, labels)
+        if: steps.check_files.outputs.exists == 'true'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Frontend Docker image to GHCR
+        if: steps.check_files.outputs.exists == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

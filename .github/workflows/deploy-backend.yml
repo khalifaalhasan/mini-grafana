@@ -1,0 +1,83 @@
+name: CD — Deploy Backend & Database Migration
+
+on:
+  push:
+    branches: ['main', 'production']
+    paths:
+      - 'backend/**'
+  workflow_dispatch: # Memungkinkan trigger deployment secara manual dari GitHub Actions UI
+
+jobs:
+  deploy-to-production:
+    name: Deploy to Server & Run Migrations
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy Backend Docker Compose file via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "backend/docker-compose.yml"
+          target: "${{ secrets.DEPLOY_PATH_BACKEND }}"
+
+      - name: Deploy & Execute DB Migrations via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            echo "=========================================================="
+            echo " [1/5] Masuk ke direktori aplikasi & Git Pull"
+            echo "=========================================================="
+            DEPLOY_DIR="${{ secrets.DEPLOY_PATH_BACKEND }}"
+            echo "Directori target deployment: $DEPLOY_DIR"
+            cd "$DEPLOY_DIR" || exit 1
+
+            # Jika folder server menggunakan git repo, jalankan pull; jika tidak (hanya hasil SCP), abaikan:
+            if [ -d ".git" ]; then
+              git fetch --all
+              git reset --hard origin/main
+            fi
+
+            echo "=========================================================="
+            echo " [2/5] Menulis file .env di dalam folder backend/"
+            echo "=========================================================="
+            cat <<'EOF_ENV' > .env
+            ${{ secrets.ENV_PROD_BACKEND }}
+            EOF_ENV
+            mkdir -p backend
+            cp .env backend/.env
+            chmod 600 .env backend/.env
+
+            echo "=========================================================="
+            echo " [3/5] Mengunduh Docker Image terbaru dari GHCR"
+            echo "=========================================================="
+            # Login ke GHCR dan pull image (agar server tidak membebani CPU/RAM untuk build)
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin || true
+            docker pull ghcr.io/${{ github.repository }}-backend:latest
+
+            echo "=========================================================="
+            echo " [4/5] Menjalankan Database Migrations via Drizzle ORM"
+            echo "=========================================================="
+            # Memastikan proxy_network dan minigrafana-net tersedia di server
+            docker network inspect proxy_network >/dev/null 2>&1 || docker network create proxy_network
+            docker network inspect minigrafana-net >/dev/null 2>&1 || docker network create minigrafana-net
+
+            # Menjalankan migrasi Drizzle secara terisolasi ke database production
+            docker run --rm --network minigrafana-net --env-file backend/.env ghcr.io/${{ github.repository }}-backend:latest bun run db:migrate
+
+            echo "=========================================================="
+            echo " [5/5] Merestart Container Aplikasi Backend"
+            echo "=========================================================="
+            cd backend && docker compose up -d --force-recreate
+            echo "✅ Deployment dan Migrasi Database selesai!"

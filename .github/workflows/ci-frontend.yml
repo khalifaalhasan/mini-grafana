@@ -1,0 +1,44 @@
+name: CI — Frontend Dashboard (Vite / React)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    paths:
+      - "frontend/**"
+  pull_request:
+    branches: [ "main", "master" ]
+    paths:
+      - "frontend/**"
+
+jobs:
+  build-and-test-frontend:
+    name: Build & Lint Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun environment
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies (jika package.json ada)
+        run: |
+          if [ -f "package.json" ]; then
+            bun install --frozen-lockfile
+          else
+            echo "package.json belum ada di folder frontend/. Melewatkan instalasi."
+          fi
+
+      - name: Lint & Build (jika package.json ada)
+        run: |
+          if [ -f "package.json" ]; then
+            bun run build --if-present
+          else
+            echo "package.json belum ada di folder frontend/. Melewatkan build."
+          fi

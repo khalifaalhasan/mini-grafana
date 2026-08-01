@@ -1,0 +1,66 @@
+name: CD — Deploy Monitoring Stack (Loki + Alloy)
+
+on:
+  push:
+    branches: [ "main", "production" ]
+    paths:
+      - "monitoring/**"
+  workflow_dispatch: # Trigger manual dari GitHub Actions UI
+
+jobs:
+  deploy-monitoring:
+    name: Deploy Monitoring Stack via SSH
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy Monitoring Docker Compose & Config Files via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "monitoring/docker-compose.yml,monitoring/config.alloy,monitoring/loki-config.yml"
+          target: "${{ vars.DEPLOY_PATH_MONITORING || secrets.DEPLOY_PATH_MONITORING || format('/home/{0}/mini-grafana-monitoring', secrets.SERVER_USER) }}"
+
+      - name: Deploy Monitoring Stack to Server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            echo "=========================================================="
+            echo " [1/3] Menentukan direktori dan Git Pull (Monitoring)"
+            echo "=========================================================="
+            DEPLOY_DIR="${{ vars.DEPLOY_PATH_MONITORING || secrets.DEPLOY_PATH_MONITORING || format('/home/{0}/mini-grafana-monitoring', secrets.SERVER_USER) }}"
+            echo "Directori monitoring deployment: $DEPLOY_DIR"
+            mkdir -p "$DEPLOY_DIR"
+            cd "$DEPLOY_DIR" || exit 1
+
+            # Jika ini repositori git terpisah atau folder di repositori yang sama:
+            if [ -d ".git" ]; then
+              git fetch --all
+              git reset --hard origin/main
+            fi
+
+            echo "=========================================================="
+            echo " [2/3] Menulis file .env dari secret ENV_MONITORING"
+            echo "=========================================================="
+            cat <<'EOF_ENV' > .env
+            ${{ secrets.ENV_MONITORING }}
+            EOF_ENV
+            chmod 600 .env
+
+            echo "=========================================================="
+            echo " [3/3] Merestart Container Monitoring (Loki + Alloy)"
+            echo "=========================================================="
+            docker network inspect proxy_network >/dev/null 2>&1 || docker network create proxy_network
+            cd monitoring && docker compose up -d --force-recreate
+            echo "✅ Deployment Monitoring Stack selesai!"

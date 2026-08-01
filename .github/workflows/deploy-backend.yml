@@ -1,4 +1,4 @@
-name: CD — Deploy Backend & Database Migration
+name: CD — Build, Push, Deploy Backend
 
 on:
   push:

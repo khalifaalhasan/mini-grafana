@@ -2,11 +2,11 @@ name: CD — Deploy Ollama Stack
 
 on:
   push:
-    branches: [ "main", "production" ]
+    branches: ["main", "production"]
     paths:
       - "ollama/**"
-      - '.github/workflows/deploy-ollama'
-      - '!**/**/*.md'
+      - ".github/workflows/deploy-ollama.yml"
+      - "!**/**/*.md"
 
   workflow_dispatch: # Trigger manual dari GitHub Actions UI
 

@@ -5,7 +5,7 @@ on:
     branches: [ "main", "production" ]
     paths:
       - "monitoring/**"
-      - ".github/**"
+      - '.github/workflows/deploy-monitoring.yml'
 
   workflow_dispatch: # Trigger manual dari GitHub Actions UI
 

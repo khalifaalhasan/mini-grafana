@@ -7,12 +7,20 @@ on:
       - "backend/**"
       - ".github/workflows/deploy-backend.yml"
       - '!**/**/*.md'
+  workflow_dispatch:
 
-  workflow_dispatch: # Memungkinkan trigger deployment secara manual dari GitHub Actions UI
+# ✅ 1. WAJIB DEFINISIKAN ENV DI ROOT AGAR TIDAK NYASAR KE DOCKER HUB!
+env:
+  REGISTRY: ghcr.io
+  # Menggunakan lowercase otomatis untuk menghindari error GHCR uppercase
+  IMAGE_NAME: ${{ github.repository }}-backend
 
 jobs:
+  # ==========================================================
+  # JOB 1: CONTINUOUS INTEGRATION (TYPECHECK & TEST)
+  # ==========================================================
   build-and-test:
-    name: Build & Test (Bun)
+    name: 1. Build & Test (Bun)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -36,12 +44,16 @@ jobs:
       - name: Run Unit Tests
         run: bun test
 
+  # ==========================================================
+  # JOB 2: BUILD & PUSH IMAGE KE GHCR
+  # ==========================================================
   build-and-push-ghcr:
-    name: Build & Push Backend Docker Image to GHCR
+    name: 2. Build & Push Docker Image to GHCR
+    needs: build-and-test                       # ✅ KUNCI: Harus nunggu Job 1 sukses!
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      packages: write                           # ✅ KUNCI: Izin push ke GHCR
 
     steps:
       - name: Checkout repository
@@ -79,8 +91,12 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  # ==========================================================
+  # JOB 3: DEPLOY KE SERVER PRODUCTION VPS VIA SSH
+  # ==========================================================
   deploy-to-production:
-    name: Deploy to Server & Run Migrations
+    name: 3. Deploy to Server & Run Migrations
+    needs: build-and-push-ghcr                  # ✅ KUNCI: Harus nunggu Job 2 sukses!
     runs-on: ubuntu-latest
     environment: staging
 
@@ -97,6 +113,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "backend/docker-compose.yml"
           target: "${{ secrets.DEPLOY_PATH_BACKEND }}"
+          strip_components: 1                   # ✅ KUNCI: Letakkan langsung docker-compose.yml di target!
 
       - name: Deploy & Execute DB Migrations via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -106,50 +123,47 @@ jobs:
           port: ${{ secrets.SERVER_PORT || '22' }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 30m
-          script_stop: true
+          script_stop: true                     # ✅ KUNCI: Hentikan langsung jika ada error 1 pun!
           script: |
             echo "=========================================================="
-            echo " [1/5] Masuk ke direktori aplikasi & Git Pull"
+            echo " [1/5] Masuk ke direktori aplikasi"
             echo "=========================================================="
             DEPLOY_DIR="${{ secrets.DEPLOY_PATH_BACKEND }}"
             echo "Directori target deployment: $DEPLOY_DIR"
+            mkdir -p "$DEPLOY_DIR"
             cd "$DEPLOY_DIR" || exit 1
 
-            # Jika folder server menggunakan git repo, jalankan pull; jika tidak (hanya hasil SCP), abaikan:
-            if [ -d ".git" ]; then
-              git fetch --all
-              git reset --hard origin/main
-            fi
-
             echo "=========================================================="
-            echo " [2/5] Menulis file .env di dalam folder backend/"
+            echo " [2/5] Menulis file .env production"
             echo "=========================================================="
+            # Menulis file .env di level direktori yang sama dengan docker-compose.yml
             cat <<'EOF_ENV' > .env
             ${{ secrets.ENV_PROD_BACKEND }}
             EOF_ENV
-            mkdir -p backend
-            cp .env backend/.env
-            chmod 600 .env backend/.env
+            chmod 600 .env
 
             echo "=========================================================="
             echo " [3/5] Mengunduh Docker Image terbaru dari GHCR"
             echo "=========================================================="
-            # Login ke GHCR dan pull image (agar server tidak membebani CPU/RAM untuk build)
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin || true
-            docker pull ghcr.io/${{ github.repository }}-backend:latest
+            # Ubah nama repositori ke lowercase via bash syntax (GHCR menolak uppercase)
+            REPO_LOWER=$(echo "${{ github.repository }}-backend" | tr '[:upper:]' '[:lower:]')
+            IMAGE_TARGET="ghcr.io/${REPO_LOWER}:latest"
+
+            echo "Pulling image: $IMAGE_TARGET"
+            docker pull "$IMAGE_TARGET"
 
             echo "=========================================================="
             echo " [4/5] Menjalankan Database Migrations via Drizzle ORM"
             echo "=========================================================="
-            # Memastikan proxy_network dan minigrafana-net tersedia di server
             docker network inspect proxy_network >/dev/null 2>&1 || docker network create proxy_network
             docker network inspect minigrafana-net >/dev/null 2>&1 || docker network create minigrafana-net
 
             # Menjalankan migrasi Drizzle secara terisolasi ke database production
-            docker run --rm --network minigrafana-net --env-file backend/.env ghcr.io/${{ github.repository }}-backend:latest bun run db:migrate:prod
+            docker run --rm --network minigrafana-net --env-file .env "$IMAGE_TARGET" bun run db:migrate:prod
 
             echo "=========================================================="
             echo " [5/5] Merestart Container Aplikasi Backend"
             echo "=========================================================="
-            cd backend && docker compose up -d --force-recreate
+            docker compose up -d --force-recreate --remove-orphans
+            docker image prune -f
             echo "✅ Deployment dan Migrasi Database selesai!"

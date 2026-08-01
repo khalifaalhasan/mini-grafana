@@ -153,11 +153,7 @@ jobs:
             echo "=========================================================="
             echo " [4/5] Menjalankan Database Migrations via Drizzle ORM"
             echo "=========================================================="
-            docker network inspect proxy_network >/dev/null 2>&1 || docker network create proxy_network
-            docker network inspect minigrafana-net >/dev/null 2>&1 || docker network create minigrafana-net
-
-            # Menjalankan migrasi Drizzle secara terisolasi ke database production
-            docker run --rm --network minigrafana-net --env-file .env "$IMAGE_TARGET" bun run db:migrate:prod
+            docker compose run --rm backend bun run db:migrate:prod
 
             echo "=========================================================="
             echo " [5/5] Merestart Container Aplikasi Backend"

@@ -140,25 +140,25 @@
 
 ### 5.1 Inisialisasi React + Vite
 
-- [ ] **T-059** Buat project React + Vite + TypeScript di folder `client/` di root project: `npm create vite@latest client -- --template react-ts`
-- [ ] **T-060** Install dependencies frontend: `axios`, `react-router-dom`, `date-fns`
-- [ ] **T-061** Install UI library pilihan (contoh: `lucide-react` untuk icons)
-- [ ] **T-062** Buat `client/.env` dengan `VITE_API_URL=http://localhost:3000`
+- [x] **T-059** ✅ Buat project React + Vite + TypeScript di folder `frontend/` (bun create vite, template react-ts) *(selesai)*
+- [x] **T-060** ✅ Install dependencies frontend: `axios`, `react-router-dom`, `date-fns` *(selesai)*
+- [x] **T-061** ✅ Install UI library: `lucide-react` + **shadcn/ui** (dengan Tailwind CSS v4) *(selesai)*
+- [x] **T-062** ✅ Buat `frontend/.env` dengan `VITE_API_BASE_URL=http://localhost:3000/api` *(selesai)*
 
 ### 5.2 Struktur Folder Frontend
 
-- [ ] **T-063** Buat struktur folder: `src/api/`, `src/components/`, `src/pages/`, `src/hooks/`, `src/types/`
-- [ ] **T-064** Buat `src/api/client.ts` — setup Axios instance dengan `baseURL` dari `VITE_API_URL`
-- [ ] **T-065** Buat `src/api/loki.api.ts` — fungsi `fetchLogs()`, `fetchLabels()`, `fetchLabelValues()`
-- [ ] **T-066** Buat `src/api/analysis.api.ts` — fungsi `triggerRca()`, `fetchHistory()`
-- [ ] **T-067** Buat `src/api/ollama.api.ts` — fungsi `fetchModels()`
-- [ ] **T-068** Buat `src/types/loki.types.ts` — mirror dari backend DTO (LokiStream, dsb.)
-- [ ] **T-069** Buat `src/types/analysis.types.ts` — mirror dari backend DTO (RcaResponse, dsb.)
+- [x] **T-063** ✅ Buat struktur folder: `src/api/`, `src/components/`, `src/pages/`, `src/hooks/`, `src/types/` *(selesai)*
+- [x] **T-064** ✅ Buat `src/api/client.ts` — Axios instance dengan `baseURL` dari `VITE_API_BASE_URL` *(selesai)*
+- [x] **T-065** ✅ Buat `src/api/loki.api.ts` — `fetchLogs()`, `fetchLabels()`, `fetchLabelValues()`, `flattenLokiResponse()` *(selesai)*
+- [x] **T-066** ✅ Buat `src/api/analysis.api.ts` — `triggerRca()`, `triggerRcaStream()`, `fetchHistory()` *(selesai)*
+- [x] **T-067** ✅ Buat `src/api/ollama.api.ts` — `fetchModels()`, `fetchModelNames()` *(selesai)*
+- [x] **T-068** ✅ Buat `src/types/loki.types.ts` — `LokiStream`, `LogEntry`, `LogLevel`, `LokiQueryParams`, dsb. *(selesai)*
+- [x] **T-069** ✅ Buat `src/types/analysis.types.ts` — `RcaRequestDto`, `RcaResponse`, `RcaHistoryItem`, `OllamaModel` *(selesai)*
 
 ### 5.3 Routing
 
-- [ ] **T-070** Setup `react-router-dom` di `App.tsx` dengan routes: `/` (Dashboard), `/logs` (Log Explorer), `/history` (RCA History)
-- [ ] **T-071** Buat komponen `Navbar` dengan navigasi ke semua halaman
+- [x] **T-070** ✅ Setup `react-router-dom` di `App.tsx` — routes: `/` (Dashboard), `/logs` (Log Explorer), `/history` (RCA History) + fallback `*` redirect *(selesai)*
+- [x] **T-071** ✅ Buat komponen `Navbar` — NavLink aktif styling, sticky header, lucide-react icons *(selesai)*
 
 ---
 
@@ -263,7 +263,7 @@
 | Phase 3 — Ollama Module | 8 | 8 | ✅ Selesai |
 | Phase 4 — Analysis Module | 17 | 17 | ✅ Selesai |
 | Phase 11 — DevOps & CI/CD | 5 | 5 | ✅ Selesai (Docker, CI/CD, DB Migrations) |
-| Phase 5 — Frontend Setup | 13 | 0 | ⏭️ Deferred (Fokus Backend terlebih dahulu) |
+| Phase 5 — Frontend Setup | 13 | 13 | ✅ Selesai |
 | Phase 6 — Log Explorer | 12 | 0 | ⏭️ Deferred (Fokus Backend terlebih dahulu) |
 | Phase 7 — RCA Panel | 7 | 0 | ⏭️ Deferred (Fokus Backend terlebih dahulu) |
 | Phase 8 — Dashboard | 6 | 0 | ⏭️ Deferred (Fokus Backend terlebih dahulu) |

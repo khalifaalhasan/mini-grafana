@@ -8,8 +8,11 @@ on:
       - '.github/workflows/deploy-frontend'
       - '!**/**/*.md'
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}-frontend
 
-  workflow_dispatch: # Trigger manual dari GitHub Actions UI
+  workflow_dispatch:
 
 jobs:
   build-and-test-frontend:

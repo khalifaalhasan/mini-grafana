@@ -92,11 +92,11 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ==========================================================
-  # JOB 3: DEPLOY KE SERVER PRODUCTION VPS VIA SSH
+  # JOB 3: DEPLOY KE SERVER VPS VIA SSH
   # ==========================================================
-  deploy-to-production:
+  deploy-to-server:
     name: 3. Deploy to Server & Run Migrations
-    needs: build-and-push-ghcr # ✅ KUNCI: Harus nunggu Job 2 sukses!
+    needs: build-and-push-ghcr
     runs-on: ubuntu-latest
     environment: staging
 
@@ -112,8 +112,8 @@ jobs:
           port: ${{ secrets.SERVER_PORT || '22' }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "backend/docker-compose.yml"
-          target: "${{ secrets.DEPLOY_PATH_BACKEND }}"
-          strip_components: 1 # ✅ KUNCI: Letakkan langsung docker-compose.yml di target!
+          target: "${{ vars.DEPLOY_PATH_BACKEND || secrets.DEPLOY_PATH_BACKEND }}"
+          strip_components: 1
 
       - name: Deploy & Execute DB Migrations via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -123,12 +123,12 @@ jobs:
           port: ${{ secrets.SERVER_PORT || '22' }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 30m
-          script_stop: true # ✅ KUNCI: Hentikan langsung jika ada error 1 pun!
+          script_stop: true
           script: |
             echo "=========================================================="
             echo " [1/5] Masuk ke direktori aplikasi"
             echo "=========================================================="
-            DEPLOY_DIR="${{ secrets.DEPLOY_PATH_BACKEND }}"
+            DEPLOY_DIR="${{ vars.DEPLOY_PATH_BACKEND || secrets.DEPLOY_PATH_BACKEND }}"
             echo "Directori target deployment: $DEPLOY_DIR"
             mkdir -p "$DEPLOY_DIR"
             cd "$DEPLOY_DIR" || exit 1

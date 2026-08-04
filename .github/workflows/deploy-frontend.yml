@@ -134,7 +134,7 @@ jobs:
             echo "=========================================================="
             echo " [1/3] Menentukan direktori dan Git Pull (Frontend)"
             echo "=========================================================="
-            DEPLOY_DIR="${{ vars.DEPLOY_PATH_FRONTEND || secrets.DEPLOY_PATH_FRONTEND || format('/home/{0}/mini-grafana-frontend', secrets.SERVER_USER) }}"
+            DEPLOY_DIR="${{ vars.DEPLOY_PATH_FRONTEND || secrets.DEPLOY_PATH_FRONTEND}}"
             echo "Directori frontend deployment: $DEPLOY_DIR"
             mkdir -p "$DEPLOY_DIR"
             cd "$DEPLOY_DIR" || exit 1
@@ -157,5 +157,5 @@ jobs:
             echo " [3/3] Menjalankan / Merestart Container Frontend"
             echo "=========================================================="
             docker network inspect proxy_network >/dev/null 2>&1 || docker network create proxy_network
-            cd frontend && docker compose up -d --force-recreate
+            docker compose up -d --force-recreate
             echo "✅ Deployment Frontend Dashboard selesai!"
